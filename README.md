@@ -3,8 +3,7 @@ Based on [untiktok.vercel.app](http://untiktok.vercel.app) by [@imousart](https:
 
 ## What it does
 - Watch TikTok videos without installing TikTok app
-- Supports most TikTok video links
-- Simple and lightweight solution
+- Supports most TikTok video links (If you use the app directly it opens chrome, otherwise it opens nightly firefox) (Modify this and choose the package you want)
 
 ## Why
 For those who prefer not to install TikTok but still want to occasionally view specific content that others share.
