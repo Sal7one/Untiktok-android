@@ -1,5 +1,5 @@
 # TikTok Link Viewer
-Based on [untiktok.com‎](http://untiktok.com‎) by [@imousart](https://x.com/imousart)
+Based on [untiktok.com‎](https://www.untiktok.com) by [@imousart](https://x.com/imousart)
 
 ## What it does
 - Watch TikTok videos without installing TikTok app
