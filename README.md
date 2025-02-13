@@ -1,5 +1,5 @@
 # TikTok Link Viewer
-Based on [untiktok.vercel.app](http://untiktok.vercel.app) by [@imousart](https://x.com/imousart)
+Based on [untiktok.vercel.app](http://untiktok.com‎) by [@imousart](https://x.com/imousart)
 
 ## What it does
 - Watch TikTok videos without installing TikTok app
