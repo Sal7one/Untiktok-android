@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_description">ببساطة الصق الرابط الذي وصلك كمشاركة وسنفتحه لك في المتصفح .. انجوي :)</string>
+    <string name="url_input_label">الصق رابط الفيديو هنا</string>
+    <string name="resolve_option_label">احصل على الرابط النهائي</string>
+    <string name="open_url_button">افتح الرابط</string>
+    <string name="invalid_url_error">الرجاء إدخال رابط صحيح لتيك توك</string>
+    <string name="url_resolution_error">فشل في الحصول على الرابط النهائي</string>
+    <string name="generic_error">حدث خطأ ما. الرجاء المحاولة مرة أخرى</string>
+    <string name="app_name">Untiktok</string>
+</resources>
