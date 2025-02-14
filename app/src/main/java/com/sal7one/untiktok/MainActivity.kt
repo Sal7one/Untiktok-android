@@ -1,14 +1,13 @@
 package com.sal7one.untiktok
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +18,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -33,11 +35,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -51,14 +53,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sal7one.untiktok.ui.theme.UntiktokTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: TikTokViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -80,17 +78,17 @@ class MainActivity : ComponentActivity() {
         intent?.let { handleIncomingIntent(it) }
     }
 
-
     private fun handleIncomingIntent(intent: Intent?) {
         when (intent?.action) {
             Intent.ACTION_PROCESS_TEXT -> {
-                val text = when {
-                    intent.hasExtra(Intent.EXTRA_PROCESS_TEXT) ->
-                        intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
-                    intent.hasExtra(Intent.EXTRA_PROCESS_TEXT_READONLY) ->
-                        intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT_READONLY)?.toString()
-                    else -> null
-                }
+                val text =
+                    when {
+                        intent.hasExtra(Intent.EXTRA_PROCESS_TEXT) ->
+                            intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+                        intent.hasExtra(Intent.EXTRA_PROCESS_TEXT_READONLY) ->
+                            intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT_READONLY)?.toString()
+                        else -> null
+                    }
                 text?.let { handleSharedText(it) }
             }
             Intent.ACTION_SEND -> {
@@ -112,7 +110,7 @@ class MainActivity : ComponentActivity() {
                 context = this,
                 onError = { message ->
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-                }
+                },
             )
             // Finish the activity after handling the intent
         }
@@ -120,18 +118,20 @@ class MainActivity : ComponentActivity() {
 
     private fun extractTikTokUrl(text: String): String? {
         // Updated regex to match more TikTok URL patterns
-        val regex = Regex(
-            "https?://(?:(?:vt|vr|vm|www)\\.)?(?:tiktok\\.com)/(?:@[\\w.-]+/video/\\d+|[\\w.-]+/\\d+|v/\\d+|t/\\d+|.*)"
-        )
+        val regex =
+            Regex(
+                "https?://(?:(?:vt|vr|vm|www)\\.)?(?:tiktok\\.com)/(?:@[\\w.-]+/video/\\d+|[\\w.-]+/\\d+|v/\\d+|t/\\d+|.*)",
+            )
         return regex.find(text)?.value
     }
+
     override fun onStop() {
         super.onStop()
         finishAndRemoveTask()
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TikTokUrlOpenerApp(viewModel: TikTokViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
@@ -139,21 +139,77 @@ fun TikTokUrlOpenerApp(viewModel: TikTokViewModel = viewModel()) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    var showPackageSelecor by remember {
+        mutableStateOf(false)
+    }
+
+    var currentBrowser by remember {
+        mutableStateOf(viewModel.getPackageId(context) ?: "")
+    }
+
+    Box {
+        if (showPackageSelecor) {
+            AlertDialog(
+                onDismissRequest = {
+                    showPackageSelecor = false
+                },
+                content = {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.background),
+                    ) {
+                        PackageGetter {
+                            viewModel.savePackageId(context = context, packageId = it)
+                            showPackageSelecor = false
+
+                            currentBrowser = viewModel.getPackageId(context)?: ""
+                        }
+                    }
+                },
+            )
+        }
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
-            AppLogo()
+            Box(
+                modifier =
+                    Modifier.clickable {
+                        showPackageSelecor = true
+                    },
+            ) {
+                AppLogo()
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text =
+                    stringResource(R.string.app_description),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = stringResource(R.string.app_description),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                text =
+                    if (!currentBrowser.isNullOrEmpty()) {
+                        stringResource(R.string.no_browser)
+                    } else {
+                        stringResource(R.string.current_browser, currentBrowser)
+                    },
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = Color(0xFF065270)
+                ),
+                modifier =
+                    Modifier
+                        .clickable { showPackageSelecor = true }
+                        .padding(horizontal = 16.dp),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -166,18 +222,18 @@ fun TikTokUrlOpenerApp(viewModel: TikTokViewModel = viewModel()) {
                         context = context,
                         onError = { message ->
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
+                        },
                     )
                     focusManager.clearFocus()
                     keyboardController?.hide()
-                }
+                },
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             ResolveOptionCheckbox(
                 checked = uiState.resolveOption,
-                onCheckedChange = viewModel::updateResolveOption
+                onCheckedChange = viewModel::updateResolveOption,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -185,16 +241,15 @@ fun TikTokUrlOpenerApp(viewModel: TikTokViewModel = viewModel()) {
             OpenUrlButton(
                 enabled = uiState.url.trim().isNotEmpty(),
                 onClick = {
-                    viewModel.setChrome()
                     viewModel.handleUrlOpen(
                         context = context,
                         onError = { message ->
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
+                        },
                     )
                     focusManager.clearFocus()
                     keyboardController?.hide()
-                }
+                },
             )
         }
 
@@ -209,13 +264,18 @@ private fun AppLogo() {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = "UN",
-            style = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.primary
+            style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary,
         )
         Text(
             text = "TIKTOK",
-            style = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.secondary
+            style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Text(
+            text = " - Android edition",
+            style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+            color = Color(0xFF29812D),
         )
     }
 }
@@ -224,7 +284,7 @@ private fun AppLogo() {
 private fun UrlInput(
     url: String,
     onUrlChange: (String) -> Unit,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
 ) {
     OutlinedTextField(
         value = url,
@@ -233,22 +293,22 @@ private fun UrlInput(
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Go),
-        keyboardActions = KeyboardActions(onGo = { onSubmit() })
+        keyboardActions = KeyboardActions(onGo = { onSubmit() }),
     )
 }
 
 @Composable
 private fun ResolveOptionCheckbox(
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(text = stringResource(R.string.resolve_option_label))
@@ -258,12 +318,12 @@ private fun ResolveOptionCheckbox(
 @Composable
 private fun OpenUrlButton(
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        enabled = enabled
+        enabled = enabled,
     ) {
         Text(text = stringResource(R.string.open_url_button))
     }
@@ -272,10 +332,11 @@ private fun OpenUrlButton(
 @Composable
 private fun LoadingOverlay() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.3f)),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f)),
+        contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator()
     }

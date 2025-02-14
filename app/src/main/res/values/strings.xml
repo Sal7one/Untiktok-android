@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_description">ببساطة الصق الرابط الذي وصلك كمشاركة وسنفتحه لك في المتصفح .. انجوي :)</string>
-    <string name="url_input_label">الصق رابط الفيديو هنا</string>
-    <string name="resolve_option_label">احصل على الرابط النهائي</string>
-    <string name="open_url_button">افتح الرابط</string>
-    <string name="invalid_url_error">الرجاء إدخال رابط صحيح لتيك توك</string>
-    <string name="url_resolution_error">فشل في الحصول على الرابط النهائي</string>
-    <string name="generic_error">حدث خطأ ما. الرجاء المحاولة مرة أخرى</string>
+    <string name="current_browser">Current Browser: %s</string>
+    <string name="no_browser">Click on the logo or here to select default browser</string>
+    <string name="app_description">Simply paste the link you received as a share and we\'ll open it in your browser… Enjoy :)</string>
+    <string name="url_input_label">Paste the video link here</string>
+    <string name="resolve_option_label">Connect to the internet and get the final link if the link is shortened</string>
+    <string name="open_url_button">Open the link</string>
+    <string name="invalid_url_error">Please enter a valid TikTok link</string>
+    <string name="url_resolution_error">Failed to retrieve the final link</string>
+    <string name="generic_error">Something went wrong. Please try again</string>
     <string name="app_name">Untiktok</string>
 </resources>
