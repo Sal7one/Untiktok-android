@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -149,7 +150,7 @@ fun TikTokUrlOpenerApp(viewModel: TikTokViewModel = viewModel()) {
 
     Box {
         if (showPackageSelecor) {
-            AlertDialog(
+            BasicAlertDialog(
                 onDismissRequest = {
                     showPackageSelecor = false
                 },
